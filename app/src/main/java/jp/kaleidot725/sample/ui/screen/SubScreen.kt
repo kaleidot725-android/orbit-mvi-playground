@@ -1,5 +1,6 @@
 package jp.kaleidot725.sample.ui.screen
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -23,10 +24,16 @@ fun SubScreen(viewModel: SubViewModel, onBack: () -> Unit) {
     val state by viewModel.container.stateFlow.collectAsState()
 
     LaunchedEffect(viewModel) {
+        viewModel.popBack()
+        Log.v("TEST", "Execute PopBack")
+
         launch {
             viewModel.container.sideEffectFlow.collect {
                 when (it) {
-                    SubSideEffect.PopBack -> onBack()
+                    SubSideEffect.PopBack -> {
+                        onBack()
+                        Log.v("TEST", "ReceiveA PopBack")
+                    }
                 }
             }
         }
@@ -43,7 +50,7 @@ fun SubScreen(viewModel: SubViewModel, onBack: () -> Unit) {
             Button(onClick = { viewModel.decrement() }, modifier = Modifier.padding(8.dp)) {
                 Text(text = "DECREMENT")
             }
-            Button(onClick = { onBack() }, modifier = Modifier.padding(8.dp)) {
+            Button(onClick = { viewModel.popBack() }, modifier = Modifier.padding(8.dp)) {
                 Text(text = "Back Screen")
             }
         }
