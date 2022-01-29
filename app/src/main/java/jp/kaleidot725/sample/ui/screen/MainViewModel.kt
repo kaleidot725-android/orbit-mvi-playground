@@ -2,24 +2,41 @@ package jp.kaleidot725.sample.ui.screen
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import org.orbitmvi.orbit.ContainerHost
+import org.orbitmvi.orbit.syntax.simple.intent
+import org.orbitmvi.orbit.syntax.simple.postSideEffect
+import org.orbitmvi.orbit.syntax.simple.reduce
+import org.orbitmvi.orbit.viewmodel.container
 import java.util.*
 import javax.inject.Inject
 
+data class MainState(
+    val title: String = "HOME",
+    val createAt: Long = Date().time,
+    val count: Long = 0
+)
+
+sealed class MainSideEffect {
+    object Navigate : MainSideEffect()
+}
+
 @HiltViewModel
-class MainViewModel @Inject constructor() : ViewModel() {
-    val title = "HOME"
-    val createdAt = Date().time
+class MainViewModel @Inject constructor() : ContainerHost<MainState, MainSideEffect>, ViewModel() {
+    override val container = container<MainState, MainSideEffect>(MainState())
 
-    private val _count: MutableStateFlow<Int> = MutableStateFlow(0)
-    val count: StateFlow<Int> = _count
-
-    fun increment() {
-        _count.value = _count.value + 1
+    fun increment() = intent {
+        reduce {
+            state.copy(count = state.count + 1)
+        }
     }
 
-    fun decrement() {
-        _count.value = _count.value - 1
+    fun decrement() = intent {
+        reduce {
+            state.copy(count = state.count - 1)
+        }
+    }
+
+    fun navigate() = intent {
+        postSideEffect(MainSideEffect.Navigate)
     }
 }
